@@ -3,12 +3,12 @@
  * (as owned by the Controller)
  ********************************************/
 
-Controller.open(function(_) {
-  Options.p.substituteTextarea = function() {
+Controller.open(function (_) {
+  Options.p.substituteTextarea = function () {
     return $('<textarea autocapitalize=off autocomplete=off autocorrect=off ' +
-               'spellcheck=false x-palm-disable-ste-all=true />')[0];
+      'spellcheck=false x-palm-disable-ste-all=true />')[0];
   };
-  _.createTextarea = function() {
+  _.createTextarea = function () {
     var textareaSpan = this.textareaSpan = $('<span class="mq-textarea"></span>'),
       textarea = this.options.substituteTextarea();
     if (!textarea.nodeType) {
@@ -17,9 +17,9 @@ Controller.open(function(_) {
     textarea = this.textarea = $(textarea).appendTo(textareaSpan);
 
     var ctrlr = this;
-    ctrlr.cursor.selectionChanged = function() { ctrlr.selectionChanged(); };
+    ctrlr.cursor.selectionChanged = function () { ctrlr.selectionChanged(); };
   };
-  _.selectionChanged = function() {
+  _.selectionChanged = function () {
     var ctrlr = this;
     forceIERedraw(ctrlr.container[0]);
 
@@ -27,12 +27,12 @@ Controller.open(function(_) {
     // and/or calling textarea.select() can have anomalously bad performance:
     // https://github.com/mathquill/mathquill/issues/43#issuecomment-1399080
     if (ctrlr.textareaSelectionTimeout === undefined) {
-      ctrlr.textareaSelectionTimeout = setTimeout(function() {
+      ctrlr.textareaSelectionTimeout = setTimeout(function () {
         ctrlr.setTextareaSelection();
       });
     }
   };
-  _.setTextareaSelection = function() {
+  _.setTextareaSelection = function () {
     this.textareaSelectionTimeout = undefined;
     var latex = '';
     if (this.cursor.selection) {
@@ -44,83 +44,84 @@ Controller.open(function(_) {
     }
     this.selectFn(latex);
   };
-  _.staticMathTextareaEvents = function() {
+  _.staticMathTextareaEvents = function () {
     var ctrlr = this, root = ctrlr.root, cursor = ctrlr.cursor,
       textarea = ctrlr.textarea, textareaSpan = ctrlr.textareaSpan;
-
+    console.log("in staticMathTextareaEvents", this.container)
     this.container.prepend(jQuery('<span class="mq-selectable">')
-      .text('$'+ctrlr.exportLatex()+'$'));
+      .text('$' + ctrlr.exportLatex() + '$'));
     ctrlr.blurred = true;
     textarea.bind('cut paste', false)
-    .bind('copy', function() { ctrlr.setTextareaSelection(); })
-    .focus(function() { ctrlr.blurred = false; }).blur(function() {
-      if (cursor.selection) cursor.selection.clear();
-      setTimeout(detach); //detaching during blur explodes in WebKit
-    });
+      .bind('copy', function () { ctrlr.setTextareaSelection(); })
+      .focus(function () { ctrlr.blurred = false; }).blur(function () {
+        if (cursor.selection) cursor.selection.clear();
+        setTimeout(detach); //detaching during blur explodes in WebKit
+      });
     function detach() {
       textareaSpan.detach();
       ctrlr.blurred = true;
     }
 
-    ctrlr.selectFn = function(text) {
+    ctrlr.selectFn = function (text) {
       textarea.val(text);
       if (text) textarea.select();
     };
   };
   Options.p.substituteKeyboardEvents = saneKeyboardEvents;
-  _.editablesTextareaEvents = function() {
+  _.editablesTextareaEvents = function () {
     var ctrlr = this, textarea = ctrlr.textarea, textareaSpan = ctrlr.textareaSpan;
 
     var keyboardEventsShim = this.options.substituteKeyboardEvents(textarea, this);
-    this.selectFn = function(text) { keyboardEventsShim.select(text); };
+    this.selectFn = function (text) { keyboardEventsShim.select(text); };
+    console.log("in editMathTextareaEvents", this.container)
     this.container.prepend(textareaSpan);
     this.focusBlurEvents();
   };
-  _.unbindEditablesEvents = function() {
+  _.unbindEditablesEvents = function () {
     var ctrlr = this, textarea = ctrlr.textarea,
       textareaSpan = ctrlr.textareaSpan;
-      
-      this.selectFn = function(text) {
-        textarea.val(text);
-        if (text) textarea.select();
-      };
-      textareaSpan.remove();
-      
-      this.unbindFocusBlurEvents();
-      
-      ctrlr.blurred = true;
-      textarea.bind('cut paste', false);
+
+    this.selectFn = function (text) {
+      textarea.val(text);
+      if (text) textarea.select();
+    };
+    textareaSpan.remove();
+
+    this.unbindFocusBlurEvents();
+
+    ctrlr.blurred = true;
+    textarea.bind('cut paste', false);
   };
-  _.typedText = function(ch) {
+  _.typedText = function (ch) {
     if (ch === '\n') return this.handle('enter');
     var cursor = this.notify().cursor;
     cursor.parent.write(cursor, ch);
     this.scrollHoriz();
   };
-  _.cut = function() {
+  _.cut = function () {
     var ctrlr = this, cursor = ctrlr.cursor;
     if (cursor.selection) {
-      setTimeout(function() {
+      setTimeout(function () {
         ctrlr.notify('edit'); // deletes selection if present
         cursor.parent.bubble('reflow');
       });
     }
   };
-  _.copy = function() {
+  _.copy = function () {
     this.setTextareaSelection();
   };
-  _.paste = function(text) {
+  _.paste = function (text) {
     // TODO: document `statelessClipboard` config option in README, after
     // making it work like it should, that is, in both text and math mode
     // (currently only works in math fields, so worse than pointless, it
     //  only gets in the way by \text{}-ifying pasted stuff and $-ifying
     //  cut/copied LaTeX)
     if (this.options.statelessClipboard) {
-      if (text.slice(0,1) === '$' && text.slice(-1) === '$') {
+      if (text.slice(0, 1) === '$' && text.slice(-1) === '$') {
         text = text.slice(1, -1);
       }
       else {
-        text = '\\text{'+text+'}';
+        text = '\\text{' + text + '}';
       }
     }
     // FIXME: this always inserts math or a TextBlock, even in a RootTextBlock
