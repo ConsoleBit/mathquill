@@ -5,7 +5,7 @@
   "license": "MPL-2.0",
   "scripts": {
     "start": "node ./quickstart.html",
-    "prepare": "npm make test"
+    "prepare": "make test"
   },
   "repository": {
     "type": "git",
