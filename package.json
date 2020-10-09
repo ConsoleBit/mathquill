@@ -4,7 +4,8 @@
   "version": "0.10.1",
   "license": "MPL-2.0",
   "scripts": {
-    "start": "node ./quickstart.html"
+    "start": "node ./quickstart.html",
+    "postinstall": "mv ./dist/* ./ && rmdir ./dist"
   },
   "repository": {
     "type": "git",
