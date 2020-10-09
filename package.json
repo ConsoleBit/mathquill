@@ -4,8 +4,7 @@
   "version": "0.10.1",
   "license": "MPL-2.0",
   "scripts": {
-    "start": "node ./quickstart.html",
-    "prepare": "make test"
+    "start": "node ./quickstart.html"
   },
   "repository": {
     "type": "git",
